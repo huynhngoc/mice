@@ -18,3 +18,20 @@ for fn in filenames:
     new_fn = fn.replace('0001', '0005')
     with open(f'config/eff/{new_fn}', 'w') as f:
         json.dump(config, f)
+
+for fn in filenames:
+    with open(f'config/eff/{fn}', 'r') as f:
+        config = json.load(f)
+    config['model_params']['optimizer']['config']['learning_rate'] = 0.001
+    new_fn = fn.replace('0001', '001')
+    with open(f'config/eff/{new_fn}', 'w') as f:
+        json.dump(config, f)
+
+
+for fn in filenames:
+    with open(f'config/eff/{fn}', 'r') as f:
+        config = json.load(f)
+    config['model_params']['optimizer']['config']['learning_rate'] = 0.005
+    new_fn = fn.replace('0001', '005')
+    with open(f'config/eff/{new_fn}', 'w') as f:
+        json.dump(config, f)
