@@ -52,4 +52,4 @@ nvidia-modprobe -u -c=0
 # export ITER_PER_EPOCH=200
 # export NUM_CPUS=4
 # export RAY_ROOT=$TMPDIR/ray
-singularity exec --nv deoxys.sif python ensemble_results.py /net/fs-1/Ngoc/hnperf/$1 $2 --merge_name concat --mode concat
+singularity exec --nv deoxys.sif python ensemble_results.py $PROJECTS/KBT/mice/perf/$1 $2 --merge_name concat --mode concat
