@@ -2,8 +2,8 @@
 #SBATCH --ntasks=1               # 1 core(CPU)
 #SBATCH --nodes=1                # Use 1 node
 #SBATCH --job-name=ensemble   # sensible name for the job
-#SBATCH --mem=64G                 # Default memory per CPU is 3GB.
-#SBATCH --partition=smallmem # Use the verysmallmem-partition for jobs requiring < 10 GB RAM.
+#SBATCH --mem=4G                 # Default memory per CPU is 3GB.
+#SBATCH --partition=orion # Use the verysmallmem-partition for jobs requiring < 10 GB RAM.
 #SBATCH --mail-user=ngochuyn@nmbu.no # Email me when job is done.
 #SBATCH --mail-type=FAIL
 #SBATCH --constraint=avx2
