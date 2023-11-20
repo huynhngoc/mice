@@ -53,9 +53,6 @@ nvidia-modprobe -u -c=0
 # export ITER_PER_EPOCH=128
 export NUM_CPUS=4
 export RAY_ROOT=$TMPDIR/$USER/ray
-singularity exec --nv deoxys.sif python experiment_binary.py $1 $PROJECTS/KBT/mice/perf/$2 --temp_folder $SCRATCH_PROJECTS/KBT/perf/$2 --epochs $3 ${@:4}
-
-
 
 fold_list=$3
 for fold in ${fold_list//,/ }
