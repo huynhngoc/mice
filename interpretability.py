@@ -184,4 +184,4 @@ if __name__ == '__main__':
         df[f'tta_pred_{trial}'] = tta_preds[..., trial]
 
     df.to_csv(
-        args.log_folder + f'/mc_predicted_02.csv', index=False)
+        args.log_folder + f'/tta_predicted.csv', index=False)
