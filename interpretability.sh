@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --ntasks=10               # 1 core(CPU)
+#SBATCH --ntasks=1               # 1 core(CPU)
 #SBATCH --nodes=1                # Use 1 node
 #SBATCH --job-name=mice_interpret   # sensible name for the job
 #SBATCH --mem=32G                 # Default memory per CPU is 3GB.
