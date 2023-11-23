@@ -35,7 +35,6 @@ class Matthews_corrcoef_scorer:
         return matthews_corrcoef(*args, **kwargs)
 
 
-
 class Matthews_corrcoef_scorer:
     def __call__(self, *args, **kwargs):
         return matthews_corrcoef(*args, **kwargs)
@@ -59,8 +58,6 @@ def metric_avg_score(res_df, postprocessor):
                                   'BinaryAccuracy', 'mcc']].mean(axis=1)
 
     return res_df
-
-
 
 
 if __name__ == '__main__':
@@ -136,8 +133,8 @@ if __name__ == '__main__':
             pids.append(f[fold][meta][:])
     pids = np.concatenate(pids)
 
-    with h5py.File(args.log_folder + f'/test_vargrad_02.h5', 'w') as f:
-        print('created file', args.log_folder + f'/test_vargrad_02.h5')
+    with h5py.File(args.log_folder + f'/test_vargrad.h5', 'w') as f:
+        print('created file', args.log_folder + f'/test_vargrad.h5')
         f.create_dataset(meta, data=pids)
         f.create_dataset('vargrad', shape=(len(pids), 256, 256))
     data_gen = test_gen.generate()
@@ -148,7 +145,7 @@ if __name__ == '__main__':
     for x, _ in data_gen:
         print('MC results ....')
         tf.random.set_seed(seed)
-        mc_pred = model(x, training=True).numpy().flatten()
+        mc_pred = model(x).numpy().flatten()
         mc_preds.append(mc_pred)
         print(f'Batch {i}/{steps_per_epoch}')
         np_random_gen = np.random.default_rng(1123)
@@ -157,13 +154,14 @@ if __name__ == '__main__':
         tta_pred = np.zeros((x.shape[0], 40))
         for trial in range(40):
             print(f'Trial {trial+1}/40')
-            noise = np_random_gen.normal(loc=0.0, scale=.02, size=x.shape[:-1]) * 255
+            noise = np_random_gen.normal(
+                loc=0.0, scale=.05, size=x.shape[:-1]) * 255
             x_noised = x + np.stack([noise]*3, axis=-1)
             x_noised = tf.Variable(x_noised)
             tf.random.set_seed(seed)
             with tf.GradientTape() as tape:
                 tape.watch(x_noised)
-                pred = model(x_noised, training=True)
+                pred = model(x_noised)
 
             grads = tape.gradient(pred, x_noised).numpy()
             var_grad[..., trial] = grads
@@ -172,7 +170,7 @@ if __name__ == '__main__':
 
         tta_preds.append(tta_pred)
         final_var_grad = (var_grad.std(axis=-1)**2).mean(axis=-1)
-        with h5py.File(args.log_folder + f'/test_vargrad_02.h5', 'a') as f:
+        with h5py.File(args.log_folder + f'/test_vargrad.h5', 'a') as f:
             f['vargrad'][sub_idx:sub_idx + len(x)] = final_var_grad
         sub_idx += x.shape[0]
         i += 1
