@@ -74,3 +74,13 @@ for fn in filenames:
     new_fn = fn.replace('b1', 'b4')
     with open(f'config/eff/{new_fn}', 'w') as f:
         json.dump(config, f)
+
+for fn in filenames:
+    if 'lr005_' in fn:
+        continue
+    with open(f'config/eff/{fn}', 'r') as f:
+        config = json.load(f)
+    config['architecture']['class_name'] = 'B4'
+    new_fn = fn.replace('b1', 'b5')
+    with open(f'config/eff/{new_fn}', 'w') as f:
+        json.dump(config, f)

@@ -79,10 +79,7 @@ if __name__ == '__main__':
             # Virtual devices must be set before GPUs have been initialized
             print(e)
 
-    if '2d' in args.log_folder:
-        meta = args.meta
-    else:
-        meta = args.meta.split(',')[0]
+    meta = args.meta
 
     print('training from configuration', args.config_file,
           'and saving log files to', args.log_folder)
