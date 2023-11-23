@@ -171,7 +171,7 @@ if __name__ == '__main__':
             tta_pred[..., trial] = pred.numpy().flatten()
 
         tta_preds.append(tta_pred)
-        final_var_grad = var_grad.std(axis=-1)**2
+        final_var_grad = (var_grad.std(axis=-1)**2).mean(axis=-1)
         with h5py.File(args.log_folder + f'/test_vargrad.h5', 'a') as f:
             f['vargrad'][sub_idx:sub_idx + len(x)] = final_var_grad
         sub_idx += x.shape[0]
