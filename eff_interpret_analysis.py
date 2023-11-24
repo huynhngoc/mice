@@ -19,7 +19,7 @@ def merge_vargrad(fold):
     predicted = []
     tta = []
     for d in selected_folders:
-        df = pd.read_csv(base_path + 'orion/' + d + '/mc_predicted.csv')
+        df = pd.read_csv(base_path + 'orion/' + d + '/tta_predicted.csv')
         predicted.append(df['predicted'])
         tta.append(df.values[:, 2:])
 
