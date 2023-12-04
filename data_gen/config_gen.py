@@ -2,7 +2,8 @@ import os
 import json
 
 
-filenames = [fn for fn in os.listdir('config/eff') if fn.startswith('b1_lr0001')]
+filenames = [fn for fn in os.listdir(
+    'config/eff') if fn.startswith('b1_lr0001')]
 
 assert len(filenames) == 20
 
@@ -37,7 +38,6 @@ for fn in filenames:
         json.dump(config, f)
 
 
-
 # ===========================================================================
 filenames = [fn for fn in os.listdir('config/eff') if fn.startswith('b1_')]
 assert len(filenames) == 20 * 4
@@ -46,7 +46,6 @@ for fn in filenames:
     with open(f'config/eff/{fn}', 'r') as f:
         config = json.load(f)
     print(config['architecture']['class_name'])
-
 
 
 for fn in filenames:
@@ -82,5 +81,33 @@ for fn in filenames:
         config = json.load(f)
     config['architecture']['class_name'] = 'B4'
     new_fn = fn.replace('b1', 'b5')
+    with open(f'config/eff/{new_fn}', 'w') as f:
+        json.dump(config, f)
+# ===========================================================================
+filenames = [fn for fn in os.listdir(
+    'config/eff') if fn.startswith('b4_lr0005')]
+assert len(filenames) == 20
+
+for fn in filenames:
+    with open(f'config/eff/{fn}', 'r') as f:
+        config = json.load(f)
+    dataset_name = config['dataset_params']['config']['filename']
+    config['dataset_params']['config']['filename'] = dataset_name.replace(
+        'mice.h5', 'mice_AH.h5')
+    new_fn = fn.replace('.json', '_AH.json')
+    with open(f'config/eff/{new_fn}', 'w') as f:
+        json.dump(config, f)
+
+
+filenames = [fn for fn in os.listdir('config/eff') if fn.endswith('_AH.json')]
+assert len(filenames) == 20
+
+for fn in filenames:
+    with open(f'config/eff/{fn}', 'r') as f:
+        config = json.load(f)
+    dataset_name = config['dataset_params']['config']['filename']
+    config['dataset_params']['config']['filename'] = dataset_name.replace(
+        '_AH', '_unsharp')
+    new_fn = fn.replace('_AH', '_unsharp')
     with open(f'config/eff/{new_fn}', 'w') as f:
         json.dump(config, f)
