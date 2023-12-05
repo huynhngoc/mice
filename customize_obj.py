@@ -13,6 +13,7 @@ import h5py
 import os
 import shutil
 
+
 @custom_architecture
 class EfficientNetModelLoader(BaseModelLoader):
     """
@@ -72,7 +73,13 @@ class PretrainedEfficientNet(BasePreprocessor):
         # efficientNet requires input between [0-255]
         images = images * 255
         # pretrain require 3 channel
-        new_images = np.concatenate([images, images, images], axis=-1)
+        if images.shape[-1] == 1:
+            new_images = np.concatenate([images, images, images], axis=-1)
+        elif images.shape[-1] == 3:
+            new_images = images
+        else:
+            raise ValueError(
+                'Input image must have either 1 channel or 3 channel')
 
         return new_images, targets
 
@@ -87,13 +94,14 @@ class OneHot(BasePreprocessor):
     def transform(self, images, targets):
         # labels to one-hot encode
         new_targets = np.zeros((len(targets), self.num_class))
-        if self.num_class==1:
+        if self.num_class == 1:
             new_targets[..., 0] = targets
         else:
             for i in range(self.num_class):
                 new_targets[..., i][targets == i] = 1
 
         return images, new_targets
+
 
 class EnsemblePostProcessor(DefaultPostProcessor):
     def __init__(self, log_base_path='logs',
