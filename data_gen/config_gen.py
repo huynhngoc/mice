@@ -130,7 +130,6 @@ for fn in filenames:
 #     os.rename(f'config/eff/{fn}', f'config/eff/{new_fn}')
 
 
-
 filenames = [fn for fn in os.listdir('config/eff') if fn.startswith('AH_')]
 assert len(filenames) == 20
 
@@ -141,5 +140,33 @@ for fn in filenames:
     config['dataset_params']['config']['filename'] = dataset_name.replace(
         'mice_AH.h5', 'mice_3c.h5')
     new_fn = fn.replace('AH_', 'all_')
+    with open(f'config/eff/{new_fn}', 'w') as f:
+        json.dump(config, f)
+
+
+filenames = [fn for fn in os.listdir('config/eff') if fn.startswith('AH_')]
+assert len(filenames) == 20
+
+for fn in filenames:
+    with open(f'config/eff/{fn}', 'r') as f:
+        config = json.load(f)
+    dataset_name = config['dataset_params']['config']['filename']
+    config['dataset_params']['config']['filename'] = dataset_name.replace(
+        'mice_AH.h5', 'mice_MH.h5')
+    new_fn = fn.replace('AH_', 'MH_')
+    with open(f'config/eff/{new_fn}', 'w') as f:
+        json.dump(config, f)
+
+
+filenames = [fn for fn in os.listdir('config/eff') if fn.startswith('AH_')]
+assert len(filenames) == 20
+
+for fn in filenames:
+    with open(f'config/eff/{fn}', 'r') as f:
+        config = json.load(f)
+    dataset_name = config['dataset_params']['config']['filename']
+    config['dataset_params']['config']['filename'] = dataset_name.replace(
+        'mice_AH.h5', 'mice_MH_3c.h5')
+    new_fn = fn.replace('AH_', 'MH_3c_')
     with open(f'config/eff/{new_fn}', 'w') as f:
         json.dump(config, f)
