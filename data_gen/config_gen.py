@@ -170,3 +170,15 @@ for fn in filenames:
     new_fn = fn.replace('AH_', 'MH_3c_')
     with open(f'config/eff/{new_fn}', 'w') as f:
         json.dump(config, f)
+
+
+filenames = [fn for fn in os.listdir('config/eff') if fn.startswith('all_b4_')]
+assert len(filenames) == 20
+
+for fn in filenames:
+    with open(f'config/eff/{fn}', 'r') as f:
+        config = json.load(f)
+    config['architecture']['class_name'] = 'B4'
+    new_fn = fn.replace('b4', 'b1')
+    with open(f'config/eff/{new_fn}', 'w') as f:
+        json.dump(config, f)
