@@ -472,4 +472,238 @@ for i in range(5):
     assert np.all(slice_idx == slice_idx_original)
 
 
+# matching historgram + adaptive histogram equalization
+df = pd.read_csv('data_info/info_split.csv')
+df_selected = pd.read_csv('data_info/info_selected.csv')
+with open(f'D:/OUS_mice/preprocess_data/P10.npy', 'rb') as f:
+    ref_img = np.load(f)
+
+
+images = [[] for _ in range(5)]
+pids = [[] for _ in range(5)]
+sids = [[] for _ in range(5)]
+targets = [[] for _ in range(5)]
+index_order = np.concatenate(pid_folds) - 1
+for idx in index_order:
+    info = df.iloc[idx]
+    pid = info['pid']
+    fold_idx = info['fold']
+    target = 0 if info['class'] == 'control' else 1
+    with open(f'D:/OUS_mice/preprocess_data/P{pid:02d}.npy', 'rb') as f:
+        img = np.load(f)
+    # histogram matching here
+    img = match_histograms(img, ref_img)
+    # histogram equalization here
+    img = equalize_adapthist(img)
+
+    selected_slice = df_selected[df_selected.pid == pid]['slice']
+    # # get data
+    selected_img = img[list(selected_slice - 1)]
+    sids[fold_idx].extend(list(selected_slice))
+    images[fold_idx].extend(list(selected_img))
+    pids[fold_idx].extend([pid] * len(selected_slice))
+    targets[fold_idx].extend([target] * len(selected_slice))
+
+
+with h5py.File('D:/OUS_mice/datasets/mice_MH_AH.h5', 'w') as f:
+    for i in range(5):
+        f.create_group(f'fold_{i}')
+
+
+with h5py.File('D:/OUS_mice/datasets/mice_MH_AH.h5', 'a') as f:
+    for i in range(5):
+        img_data = np.array(images[i])
+        pid_data = np.array(pids[i])
+        sid_data = np.array(sids[i])
+        target_data = np.array(targets[i])
+        f[f'fold_{i}'].create_dataset(
+            'x', data=img_data[..., np.newaxis], dtype='f4')
+        f[f'fold_{i}'].create_dataset('y', data=target_data, dtype='f4')
+        f[f'fold_{i}'].create_dataset('patient_idx', data=pid_data, dtype='i4')
+        f[f'fold_{i}'].create_dataset('slice_idx', data=sid_data, dtype='i4')
+
+
+for i in range(5):
+    with h5py.File('D:/OUS_mice/datasets/mice_MH_AH.h5', 'r') as f:
+        patient_idx = f[f'fold_{i}']['patient_idx'][:]
+        slice_idx = f[f'fold_{i}']['slice_idx'][:]
+    with h5py.File('D:/OUS_mice/datasets/mice.h5', 'r') as f:
+        slice_idx_original = f[f'fold_{i}']['slice_idx'][:]
+        patient_idx_original = f[f'fold_{i}']['patient_idx'][:]
+    assert np.all(slice_idx == slice_idx_original)
+
+plt.subplot(1, 2, 1)
+plt.axis('off')
+with h5py.File('D:/OUS_mice/datasets/mice.h5', 'r') as f:
+    img = f['fold_0']['x'][5]
+plt.imshow(img[..., 0], 'gray', vmin=0, vmax=1)
+plt.title('Q999')
+
+plt.subplot(1, 2, 2)
+plt.axis('off')
+with h5py.File('D:/OUS_mice/datasets/mice_MH_AH.h5', 'r') as f:
+    img = f['fold_0']['x'][5]
+plt.imshow(img[..., 0], 'gray', vmin=0, vmax=1)
+plt.title('MH + Adaptive hist')
+plt.show()
+
+
+# matching historgram + unsharp
+df = pd.read_csv('data_info/info_split.csv')
+df_selected = pd.read_csv('data_info/info_selected.csv')
+with open(f'D:/OUS_mice/preprocess_data/P10.npy', 'rb') as f:
+    ref_img = np.load(f)
+
+
+images = [[] for _ in range(5)]
+pids = [[] for _ in range(5)]
+sids = [[] for _ in range(5)]
+targets = [[] for _ in range(5)]
+index_order = np.concatenate(pid_folds) - 1
+for idx in index_order:
+    info = df.iloc[idx]
+    pid = info['pid']
+    fold_idx = info['fold']
+    target = 0 if info['class'] == 'control' else 1
+    with open(f'D:/OUS_mice/preprocess_data/P{pid:02d}.npy', 'rb') as f:
+        img = np.load(f)
+    # histogram matching here
+    img = match_histograms(img, ref_img)
+    # histogram equalization here
+    img = unsharp_mask(img, radius=5, amount=2)
+
+    selected_slice = df_selected[df_selected.pid == pid]['slice']
+    # # get data
+    selected_img = img[list(selected_slice - 1)]
+    sids[fold_idx].extend(list(selected_slice))
+    images[fold_idx].extend(list(selected_img))
+    pids[fold_idx].extend([pid] * len(selected_slice))
+    targets[fold_idx].extend([target] * len(selected_slice))
+
+
+with h5py.File('D:/OUS_mice/datasets/mice_MH_unsharp.h5', 'w') as f:
+    for i in range(5):
+        f.create_group(f'fold_{i}')
+
+
+with h5py.File('D:/OUS_mice/datasets/mice_MH_unsharp.h5', 'a') as f:
+    for i in range(5):
+        img_data = np.array(images[i])
+        pid_data = np.array(pids[i])
+        sid_data = np.array(sids[i])
+        target_data = np.array(targets[i])
+        f[f'fold_{i}'].create_dataset(
+            'x', data=img_data[..., np.newaxis], dtype='f4')
+        f[f'fold_{i}'].create_dataset('y', data=target_data, dtype='f4')
+        f[f'fold_{i}'].create_dataset('patient_idx', data=pid_data, dtype='i4')
+        f[f'fold_{i}'].create_dataset('slice_idx', data=sid_data, dtype='i4')
+
+
+for i in range(5):
+    with h5py.File('D:/OUS_mice/datasets/mice_MH_unsharp.h5', 'r') as f:
+        patient_idx = f[f'fold_{i}']['patient_idx'][:]
+        slice_idx = f[f'fold_{i}']['slice_idx'][:]
+    with h5py.File('D:/OUS_mice/datasets/mice.h5', 'r') as f:
+        slice_idx_original = f[f'fold_{i}']['slice_idx'][:]
+        patient_idx_original = f[f'fold_{i}']['patient_idx'][:]
+    assert np.all(slice_idx == slice_idx_original)
+
+plt.subplot(1, 2, 1)
+plt.axis('off')
+with h5py.File('D:/OUS_mice/datasets/mice.h5', 'r') as f:
+    img = f['fold_0']['x'][5]
+plt.imshow(img[..., 0], 'gray', vmin=0, vmax=1)
+plt.title('Q999')
+
+plt.subplot(1, 2, 2)
+plt.axis('off')
+with h5py.File('D:/OUS_mice/datasets/mice_MH_unsharp.h5', 'r') as f:
+    img = f['fold_0']['x'][5]
+plt.imshow(img[..., 0], 'gray', vmin=0, vmax=1)
+plt.title('MH + Adaptive hist')
+plt.show()
+
+
 # =====================================
+# plot
+
+
+plt.subplot(1, 2, 1)
+plt.axis('off')
+with h5py.File('D:/OUS_mice/datasets/mice.h5', 'r') as f:
+    img = f['fold_0']['x'][5]
+plt.imshow(img[..., 0], 'gray', vmin=0, vmax=1)
+plt.title('Q999')
+
+plt.subplot(1, 2, 2)
+plt.axis('off')
+with h5py.File('D:/OUS_mice/datasets/mice_AH.h5', 'r') as f:
+    img = f['fold_0']['x'][5]
+plt.imshow(img[..., 0], 'gray', vmin=0, vmax=1)
+plt.title('Adaptive hist')
+plt.show()
+
+
+with h5py.File('D:/OUS_mice/datasets/mice.h5', 'r') as f:
+    print(f['fold_0']['patient_idx'][5])
+    print(f['fold_0']['slice_idx'][5])
+
+# 29 & 6
+df[df.pid == 29]
+# 28   29     14     5  irradiated
+
+vmin, vmax = np.inf, -np.inf
+for i in range(1, 31):
+    img = sitk.ReadImage(fn.format(group=14, name=5, slice=i))
+    img_array = sitk.GetArrayFromImage(img)
+    new_vmin, new_vmax = img_array.min(), img_array.max()
+    vmin = min(vmin, new_vmin)
+    vmax = max(vmax, new_vmax)
+
+img = sitk.ReadImage(fn.format(group=14, name=5, slice=6))
+original_img = sitk.GetArrayFromImage(img)
+
+
+plt.subplot(2, 4, 1)
+plt.axis('off')
+plt.imshow(original_img[0], 'gray', vmin=vmin, vmax=vmax)
+plt.title('Original')
+
+with h5py.File('D:/OUS_mice/datasets/mice_3c.h5', 'r') as f:
+    img = f['fold_0']['x'][5]
+
+plt.subplot(2, 4, 2)
+plt.axis('off')
+plt.imshow(img[..., 0], 'gray', vmin=0, vmax=1)
+plt.title('Quantile 0.001-0.999 (Q)')
+
+plt.subplot(2, 4, 3)
+plt.axis('off')
+plt.imshow(img[..., 1], 'gray', vmin=0, vmax=1)
+plt.title('Q + Adaptive Histogram Equalization')
+
+plt.subplot(2, 4, 4)
+plt.axis('off')
+plt.imshow(img[..., 2], 'gray', vmin=0, vmax=1)
+plt.title('Q + Unsharp filtered')
+
+with h5py.File('D:/OUS_mice/datasets/mice_MH_3c.h5', 'r') as f:
+    img = f['fold_0']['x'][5]
+plt.subplot(2, 4, 5)
+plt.axis('off')
+plt.imshow(img[..., 0], 'gray', vmin=0, vmax=1)
+plt.title('Q + Matching histogram (MH)')
+
+plt.subplot(2, 4, 6)
+plt.axis('off')
+plt.imshow(img[..., 1], 'gray', vmin=0, vmax=1)
+plt.title('MH + Adaptive Histogram Equalization')
+
+plt.subplot(2, 4, 7)
+plt.axis('off')
+plt.imshow(img[..., 2], 'gray', vmin=0, vmax=1)
+plt.title('MH + Unsharp filtered')
+
+
+plt.tight_layout()
+plt.show()
