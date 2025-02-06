@@ -4,7 +4,7 @@ from deoxys.data.preprocessor import BasePreprocessor
 from deoxys.experiment.postprocessor import DefaultPostProcessor
 from deoxys.utils import deep_copy
 
-from tensorflow.keras.applications import efficientnet
+from tensorflow.keras.applications import efficientnetv2, resnet_v2, vgg16, vgg19, mobilenet_v2, inception_v3
 from tensorflow.keras.layers import Dropout, Dense
 from tensorflow.keras.models import Model
 
@@ -13,6 +13,53 @@ import h5py
 import os
 import shutil
 
+@custom_architecture
+class PretrainModelLoader(BaseModelLoader):
+    map_name = {
+        'B0': efficientnetv2.EfficientNetV2B0,
+        'B1': efficientnetv2.EfficientNetV2B1,
+        'B2': efficientnetv2.EfficientNetV2B2,
+        'B3': efficientnetv2.EfficientNetV2B3,
+        'B4': efficientnetv2.EfficientNetV2B4,
+        'B5': efficientnetv2.EfficientNetV2B5,
+        'B6': efficientnetv2.EfficientNetV2B6,
+        'B7': efficientnetv2.EfficientNetV2B7,
+        'L': efficientnetv2.EfficientNetV2L,
+        'M': efficientnetv2.EfficientNetV2M,
+        'S': efficientnetv2.EfficientNetV2S,
+    }
+
+    def __init__(self, architecture, input_params):
+        self._input_params = deep_copy(input_params)
+        self.options = architecture
+
+    def load(self):
+        """
+
+        Returns
+        -------
+        tensorflow.keras.models.Model
+            A neural network of sequential layers
+            from the configured layer list.
+        """
+        num_class = self.options['num_class']
+        shape = self._input_params['shape']
+        pretrain_model = self.map_name[self.options['class_name']]
+
+        if num_class <= 2:
+            num_class = 1
+            activation = 'sigmoid'
+        else:
+            activation = 'softmax'
+
+        model = pretrain_model(include_top=False, classes=num_class,
+                                classifier_activation=activation, input_shape=shape, pooling='avg')
+        dropout_out = Dropout(0.3)(model.output)
+        pred = Dense(num_class, activation=activation)(dropout_out)
+        model = Model(model.inputs, pred)
+
+        return model
+
 
 @custom_architecture
 class EfficientNetModelLoader(BaseModelLoader):
@@ -20,14 +67,17 @@ class EfficientNetModelLoader(BaseModelLoader):
     Create a sequential network from list of layers
     """
     map_name = {
-        'B0': efficientnet.EfficientNetB0,
-        'B1': efficientnet.EfficientNetB1,
-        'B2': efficientnet.EfficientNetB2,
-        'B3': efficientnet.EfficientNetB3,
-        'B4': efficientnet.EfficientNetB4,
-        'B5': efficientnet.EfficientNetB5,
-        'B6': efficientnet.EfficientNetB6,
-        'B7': efficientnet.EfficientNetB7
+        'B0': efficientnetv2.EfficientNetV2B0,
+        'B1': efficientnetv2.EfficientNetV2B1,
+        'B2': efficientnetv2.EfficientNetV2B2,
+        'B3': efficientnetv2.EfficientNetV2B3,
+        'B4': efficientnetv2.EfficientNetV2B4,
+        'B5': efficientnetv2.EfficientNetV2B5,
+        'B6': efficientnetv2.EfficientNetV2B6,
+        'B7': efficientnetv2.EfficientNetV2B7,
+        'L': efficientnetv2.EfficientNetV2L,
+        'M': efficientnetv2.EfficientNetV2M,
+        'S': efficientnetv2.EfficientNetV2S,
     }
 
     def __init__(self, architecture, input_params):
@@ -65,6 +115,48 @@ class EfficientNetModelLoader(BaseModelLoader):
                                  classifier_activation=activation, input_shape=shape)
 
         return model
+
+
+
+@custom_preprocessor
+class RGBConverter(BasePreprocessor):
+    def transform(self, images, targets=None):
+        # efficientNet requires input between [0-255]
+        images = images * 255
+        # pretrain require 3 channel
+        if images.shape[-1] == 1:
+            new_images = np.concatenate([images, images, images], axis=-1)
+        elif images.shape[-1] == 3:
+            new_images = images
+        else:
+            raise ValueError(
+                'Input image must have either 1 channel or 3 channel')
+        if targets is None:
+            return new_images
+        else:
+            return new_images, targets
+
+@custom_preprocessor
+class PretrainedModelPreprocessor(BasePreprocessor):
+    map_name = {
+        'resnet': resnet_v2.preprocess_input,
+        'vgg16': vgg16.preprocess_input,
+        'vgg19': vgg19.preprocess_input,
+        'mobilenet': mobilenet_v2.preprocess_input,
+        'inception': inception_v3.preprocess_input,
+        'efficientnet': efficientnetv2.preprocess_input,
+    }
+
+    def __init__(self, model='efficientnet'):
+        self.model = model
+
+    def transform(self, images, targets=None):
+        images = np.copy(images)
+        if self.model in self.map_name:
+            images = self.map_name[self.model](images)
+        if targets is None:
+            return images
+        return images, targets
 
 
 @custom_preprocessor
