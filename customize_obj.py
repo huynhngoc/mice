@@ -4,7 +4,7 @@ from deoxys.data.preprocessor import BasePreprocessor
 from deoxys.experiment.postprocessor import DefaultPostProcessor
 from deoxys.utils import deep_copy
 
-from tensorflow.keras.applications import efficientnetv2, resnet_v2, vgg16, vgg19, mobilenet_v2, inception_v3
+from tensorflow.keras.applications import efficientnet_v2, resnet_v2, vgg16, vgg19, mobilenet_v2, inception_v3
 from tensorflow.keras.layers import Dropout, Dense
 from tensorflow.keras.models import Model
 
@@ -16,17 +16,25 @@ import shutil
 @custom_architecture
 class PretrainModelLoader(BaseModelLoader):
     map_name = {
-        'B0': efficientnetv2.EfficientNetV2B0,
-        'B1': efficientnetv2.EfficientNetV2B1,
-        'B2': efficientnetv2.EfficientNetV2B2,
-        'B3': efficientnetv2.EfficientNetV2B3,
-        'B4': efficientnetv2.EfficientNetV2B4,
-        'B5': efficientnetv2.EfficientNetV2B5,
-        'B6': efficientnetv2.EfficientNetV2B6,
-        'B7': efficientnetv2.EfficientNetV2B7,
-        'L': efficientnetv2.EfficientNetV2L,
-        'M': efficientnetv2.EfficientNetV2M,
-        'S': efficientnetv2.EfficientNetV2S,
+        'B0': efficientnet_v2.EfficientNetV2B0,
+        'B1': efficientnet_v2.EfficientNetV2B1,
+        'B2': efficientnet_v2.EfficientNetV2B2,
+        'B3': efficientnet_v2.EfficientNetV2B3,
+        'B4': efficientnet_v2.EfficientNetV2B4,
+        'B5': efficientnet_v2.EfficientNetV2B5,
+        'B6': efficientnet_v2.EfficientNetV2B6,
+        'B7': efficientnet_v2.EfficientNetV2B7,
+        'L': efficientnet_v2.EfficientNetV2L,
+        'M': efficientnet_v2.EfficientNetV2M,
+        'S': efficientnet_v2.EfficientNetV2S,
+        'ResNet50': resnet_v2.ResNet50V2,
+        'ResNet101': resnet_v2.ResNet101V2,
+        'ResNet152': resnet_v2.ResNet152V2,
+        'VGG16': vgg16.VGG16,
+        'VGG19': vgg19.VGG19,
+        'MobileNet': mobilenet_v2.MobileNetV2,
+        'InceptionV3': inception_v3.InceptionV3,
+
     }
 
     def __init__(self, architecture, input_params):
@@ -67,17 +75,17 @@ class EfficientNetModelLoader(BaseModelLoader):
     Create a sequential network from list of layers
     """
     map_name = {
-        'B0': efficientnetv2.EfficientNetV2B0,
-        'B1': efficientnetv2.EfficientNetV2B1,
-        'B2': efficientnetv2.EfficientNetV2B2,
-        'B3': efficientnetv2.EfficientNetV2B3,
-        'B4': efficientnetv2.EfficientNetV2B4,
-        'B5': efficientnetv2.EfficientNetV2B5,
-        'B6': efficientnetv2.EfficientNetV2B6,
-        'B7': efficientnetv2.EfficientNetV2B7,
-        'L': efficientnetv2.EfficientNetV2L,
-        'M': efficientnetv2.EfficientNetV2M,
-        'S': efficientnetv2.EfficientNetV2S,
+        'B0': efficientnet_v2.EfficientNetV2B0,
+        'B1': efficientnet_v2.EfficientNetV2B1,
+        'B2': efficientnet_v2.EfficientNetV2B2,
+        'B3': efficientnet_v2.EfficientNetV2B3,
+        'B4': efficientnet_v2.EfficientNetV2B4,
+        'B5': efficientnet_v2.EfficientNetV2B5,
+        'B6': efficientnet_v2.EfficientNetV2B6,
+        'B7': efficientnet_v2.EfficientNetV2B7,
+        'L': efficientnet_v2.EfficientNetV2L,
+        'M': efficientnet_v2.EfficientNetV2M,
+        'S': efficientnet_v2.EfficientNetV2S,
     }
 
     def __init__(self, architecture, input_params):
@@ -144,7 +152,7 @@ class PretrainedModelPreprocessor(BasePreprocessor):
         'vgg19': vgg19.preprocess_input,
         'mobilenet': mobilenet_v2.preprocess_input,
         'inception': inception_v3.preprocess_input,
-        'efficientnet': efficientnetv2.preprocess_input,
+        'efficientnet': efficientnet_v2.preprocess_input,
     }
 
     def __init__(self, model='efficientnet'):
