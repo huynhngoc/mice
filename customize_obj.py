@@ -4,7 +4,7 @@ from deoxys.data.preprocessor import BasePreprocessor
 from deoxys.experiment.postprocessor import DefaultPostProcessor
 from deoxys.utils import deep_copy
 
-from tensorflow.keras.applications import efficientnet_v2, resnet_v2, vgg16, vgg19, mobilenet_v2, inception_v3
+from tensorflow.keras.applications import efficientnet, efficientnet_v2, resnet_v2, vgg16, vgg19, mobilenet_v2, inception_v3
 from tensorflow.keras.layers import Dropout, Dense
 from tensorflow.keras.models import Model
 
@@ -20,10 +20,10 @@ class PretrainModelLoader(BaseModelLoader):
         'B1': efficientnet_v2.EfficientNetV2B1,
         'B2': efficientnet_v2.EfficientNetV2B2,
         'B3': efficientnet_v2.EfficientNetV2B3,
-        'B4': efficientnet_v2.EfficientNetV2B4,
-        'B5': efficientnet_v2.EfficientNetV2B5,
-        'B6': efficientnet_v2.EfficientNetV2B6,
-        'B7': efficientnet_v2.EfficientNetV2B7,
+        'B4': efficientnet.EfficientNetB4,
+        'B5': efficientnet.EfficientNetB5,
+        'B6': efficientnet.EfficientNetB6,
+        'B7': efficientnet.EfficientNetB7,
         'L': efficientnet_v2.EfficientNetV2L,
         'M': efficientnet_v2.EfficientNetV2M,
         'S': efficientnet_v2.EfficientNetV2S,
