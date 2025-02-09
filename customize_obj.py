@@ -33,7 +33,7 @@ class PretrainModelLoader(BaseModelLoader):
         'VGG16': vgg16.VGG16,
         'VGG19': vgg19.VGG19,
         'MobileNet': mobilenet_v2.MobileNetV2,
-        'InceptionV3': inception_v3.InceptionV3,
+        'Inception': inception_v3.InceptionV3,
 
     }
 
