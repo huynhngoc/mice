@@ -1,6 +1,6 @@
 import os
 import json
-
+import itertools
 
 filenames = [fn for fn in os.listdir(
     'config/eff') if fn.startswith('b1_lr0001')]
@@ -207,3 +207,116 @@ for fn in filenames:
     new_fn = fn.replace('AH_', 'MH_unsharp_')
     with open(f'config/eff/{new_fn}', 'w') as f:
         json.dump(config, f)
+
+fold_list = []
+for i in range(4, -1, -1):
+    for j in range(4, -1, -1):
+        if i == j:
+            continue
+        fold_list.append([k for k in range(5) if k != i and k != j] + [j, i])
+
+# efficientnet group
+preprocessor_group = 'efficientnet'
+learning_rates = ['0001', '0005', '001', '005']
+model_names = ['B0', 'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'S', 'M', 'L']
+with open('config/templates/pretrained_template.json', 'r') as f:
+    template = json.load(f)
+
+for lr, model in itertools.product(learning_rates, model_names):
+    base_template = template.copy()
+    base_template['architecture']['class_name'] = model
+    base_template['model_params']['optimizer']['config']['learning_rate'] = float(
+        f'0.{lr}')
+    base_template['dataset_params']['config']['preprocessors'][-1]['config']['model'] = preprocessor_group
+
+    for fold in fold_list:
+        base_template['dataset_params']['config']['train_folds'] = fold[:-2]
+        base_template['dataset_params']['config']['val_folds'] = fold[-2:-1]
+        base_template['dataset_params']['config']['test_folds'] = fold[-1:]
+        filename = f'config/{preprocessor_group}/{model}_lr{lr}_f{"".join(map(str,fold))}.json'
+        with open(filename, 'w') as f:
+            json.dump(base_template, f)
+
+# resnet group
+preprocessor_group = 'resnet'
+learning_rates = ['0001', '0005', '001', '005']
+model_names = ['ResNet50', 'ResNet101', 'ResNet152']
+with open('config/templates/pretrained_template.json', 'r') as f:
+    template = json.load(f)
+for lr, model in itertools.product(learning_rates, model_names):
+    base_template = template.copy()
+    base_template['architecture']['class_name'] = model
+    base_template['model_params']['optimizer']['config']['learning_rate'] = float(
+        f'0.{lr}')
+    base_template['dataset_params']['config']['preprocessors'][-1]['config']['model'] = preprocessor_group
+
+    for fold in fold_list:
+        base_template['dataset_params']['config']['train_folds'] = fold[:-2]
+        base_template['dataset_params']['config']['val_folds'] = fold[-2:-1]
+        base_template['dataset_params']['config']['test_folds'] = fold[-1:]
+        filename = f'config/{preprocessor_group}/{model}_lr{lr}_f{"".join(map(str,fold))}.json'
+        with open(filename, 'w') as f:
+            json.dump(base_template, f)
+
+# vgg group
+preprocessor_group = 'vgg'
+learning_rates = ['0001', '0005', '001', '005']
+model_names = ['VGG16', 'VGG19']
+with open('config/templates/pretrained_template.json', 'r') as f:
+    template = json.load(f)
+for lr, model in itertools.product(learning_rates, model_names):
+    base_template = template.copy()
+    base_template['architecture']['class_name'] = model
+    base_template['model_params']['optimizer']['config']['learning_rate'] = float(
+        f'0.{lr}')
+    base_template['dataset_params']['config']['preprocessors'][-1]['config']['model'] = model.lower()
+
+    for fold in fold_list:
+        base_template['dataset_params']['config']['train_folds'] = fold[:-2]
+        base_template['dataset_params']['config']['val_folds'] = fold[-2:-1]
+        base_template['dataset_params']['config']['test_folds'] = fold[-1:]
+        filename = f'config/{preprocessor_group}/{model}_lr{lr}_f{"".join(map(str,fold))}.json'
+        with open(filename, 'w') as f:
+            json.dump(base_template, f)
+
+# mobilenet group
+preprocessor_group = 'mobilenet'
+learning_rates = ['0001', '0005', '001', '005']
+model_names = ['MobileNet']
+with open('config/templates/pretrained_template.json', 'r') as f:
+    template = json.load(f)
+for lr, model in itertools.product(learning_rates, model_names):
+    base_template = template.copy()
+    base_template['architecture']['class_name'] = model
+    base_template['model_params']['optimizer']['config']['learning_rate'] = float(
+        f'0.{lr}')
+    base_template['dataset_params']['config']['preprocessors'][-1]['config']['model'] = preprocessor_group
+
+    for fold in fold_list:
+        base_template['dataset_params']['config']['train_folds'] = fold[:-2]
+        base_template['dataset_params']['config']['val_folds'] = fold[-2:-1]
+        base_template['dataset_params']['config']['test_folds'] = fold[-1:]
+        filename = f'config/{preprocessor_group}/{model}_lr{lr}_f{"".join(map(str,fold))}.json'
+        with open(filename, 'w') as f:
+            json.dump(base_template, f)
+
+# inception group
+preprocessor_group = 'inception'
+learning_rates = ['0001', '0005', '001', '005']
+model_names = ['Inception']
+with open('config/templates/pretrained_template.json', 'r') as f:
+    template = json.load(f)
+for lr, model in itertools.product(learning_rates, model_names):
+    base_template = template.copy()
+    base_template['architecture']['class_name'] = model
+    base_template['model_params']['optimizer']['config']['learning_rate'] = float(
+        f'0.{lr}')
+    base_template['dataset_params']['config']['preprocessors'][-1]['config']['model'] = preprocessor_group
+
+    for fold in fold_list:
+        base_template['dataset_params']['config']['train_folds'] = fold[:-2]
+        base_template['dataset_params']['config']['val_folds'] = fold[-2:-1]
+        base_template['dataset_params']['config']['test_folds'] = fold[-1:]
+        filename = f'config/{preprocessor_group}/{model}_lr{lr}_f{"".join(map(str,fold))}.json'
+        with open(filename, 'w') as f:
+            json.dump(base_template, f)

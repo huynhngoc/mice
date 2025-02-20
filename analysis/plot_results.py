@@ -392,3 +392,45 @@ plt.show()
 
 
 selected_patient_preds
+
+
+for model_name in val_results.nlargest(5, 'weighted_score')['model_name']:
+    selected_columns = ['group','model','learning_rate','accuracy', 'scaled_mcc', 'f1', 'f1_0', 'auc','weighted_score']
+    row_values = val_results[val_results['model_name'] == model_name][selected_columns].values.astype(str).tolist()
+    joined_values = ','.join([','.join(row) for row in row_values])
+    print(joined_values)
+
+
+for model_name in val_results.nlargest(5, 'weighted_score')['model_name']:
+    selected_columns = ['group','model','learning_rate','accuracy', 'scaled_mcc', 'f1', 'f1_0', 'auc','weighted_score']
+    row_values = test_results[test_results['model_name'] == model_name][selected_columns].values.astype(str).tolist()
+    joined_values = ','.join([','.join(row) for row in row_values])
+    print(joined_values)
+
+
+for model_name in val_results.nlargest(5, 'weighted_score')['model_name']:
+    selected_columns = ['group','model','learning_rate','accuracy', 'scaled_mcc', 'f1', 'f1_0', 'auc','weighted_score']
+    row_values = ensemble_results[ensemble_results['model_name'] == model_name][selected_columns].values.astype(str).tolist()
+    joined_values = ','.join([','.join(row) for row in row_values])
+    print(joined_values)
+
+
+for model_name in val_results.nlargest(5, 'weighted_score')['model_name']:
+    selected_columns = ['group','model','learning_rate','accuracy', 'scaled_mcc', 'f1', 'f1_0', 'auc','weighted_score']
+    row_values = val_patient_results[val_patient_results['model_name'] == model_name][selected_columns].values.astype(str).tolist()
+    joined_values = ','.join([','.join(row) for row in row_values])
+    print(joined_values)
+
+
+for model_name in val_results.nlargest(5, 'weighted_score')['model_name']:
+    selected_columns = ['group','model','learning_rate','accuracy', 'scaled_mcc', 'f1', 'f1_0', 'auc','weighted_score']
+    row_values = test_patient_results[test_patient_results['model_name'] == model_name][selected_columns].values.astype(str).tolist()
+    joined_values = ','.join([','.join(row) for row in row_values])
+    print(joined_values)
+
+
+for model_name in val_results.nlargest(5, 'weighted_score')['model_name']:
+    selected_columns = ['group','model','learning_rate','accuracy', 'scaled_mcc', 'f1', 'f1_0', 'auc','weighted_score']
+    row_values = ensemble_patient_results[ensemble_patient_results['model_name'] == model_name][selected_columns].values.astype(str).tolist()
+    joined_values = ','.join([','.join(row) for row in row_values])
+    print(joined_values)

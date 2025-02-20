@@ -3,10 +3,12 @@ import h5py
 import numpy as np
 from matplotlib import pyplot as plt
 import os
+import gc
 
 
 base_path = 'P:/REALTEK-HeadNeck-Project/OUS Mice/'
-dataset_filename = base_path + 'datasets/mice_2025.h5'
+# dataset_filename = base_path + 'datasets/mice_2025.h5'
+dataset_filename = '../mice_2025.h5'
 interpretability_path = base_path + 'interpretability_results/'
 model = 'b3_lr0001'
 
@@ -21,7 +23,7 @@ def merge_vargrad(fold, suffix='_02'):
             imgs.append(f['vargrad'][:])
         df = pd.read_csv(interpretability_path + d + f'/tta_predicted{suffix}.csv')
         predicted.append(df['predicted'])
-        tta.append(df.values[:, 2:])
+        tta.append(df.values[:, 3:])
     with h5py.File(interpretability_path + d + f'/test_vargrad{suffix}.h5', 'r') as f:
         pids = f['patient_idx'][:]
 
@@ -30,19 +32,19 @@ def merge_vargrad(fold, suffix='_02'):
     return pids, np.mean(predicted, axis=0), np.concatenate(tta, axis=-1), imgs
 
 
-def get_vargard(fold):
+def get_vargard(fold, suffix='_02'):
     with h5py.File(dataset_filename, 'r') as f:
         imgs = f[f'fold_{fold}']['x'][..., 0]
         sids = f[f'fold_{fold}']['slice_idx'][:]
         y = f[f'fold_{fold}']['y'][:]
 
-    pids, predicted, tta, vargrads = merge_vargrad(fold)
+    pids, predicted, tta, vargrads = merge_vargrad(fold, suffix)
     return pids, sids, y, predicted, tta, imgs, vargrads
 
 suffix = '_02'
 
-for fold in range(1, 5):
-    for pid, sid, y, predicted, tta, img,  vargrad in zip(*get_vargard(fold)):
+for fold in range(3, 5):
+    for pid, sid, y, predicted, tta, img,  vargrad in zip(*get_vargard(fold, suffix)):
         vmax = np.quantile(vargrad, 0.9999)
         vmin = np.quantile(vargrad, 0.0001)
         thres = np.quantile(vargrad, 0.85)
@@ -65,7 +67,7 @@ for fold in range(1, 5):
         # plt.violinplot(tta)
 
         plt.suptitle(
-            f'PID: {pid}, slice {sid}, class {y}, predicted {predicted:.3f}')
+            f'PID: {pid}, slice {sid}, class {y}, predicted {predicted:.3f}, tta {tta.mean():.3f}, tta std {tta.std():.3f}')
         plt.subplots_adjust(wspace=0.01, left=0.001, right=0.9999)
         # plt.show()
         fig.savefig(base_path + f'interpretability_vis/interpretability{suffix}/' +
@@ -77,7 +79,8 @@ for fold in range(1, 5):
 suffix = '_05'
 
 for fold in range(5):
-    for pid, sid, y, predicted, tta, img,  vargrad in zip(*get_vargard(fold)):
+    for pid, sid, y, predicted, tta, img,  vargrad in zip(*get_vargard(fold, suffix)):
+        gc.collect()
         vmax = np.quantile(vargrad, 0.9999)
         vmin = np.quantile(vargrad, 0.0001)
         thres = np.quantile(vargrad, 0.85)
@@ -100,7 +103,7 @@ for fold in range(5):
         # plt.violinplot(tta)
 
         plt.suptitle(
-            f'PID: {pid}, slice {sid}, class {y}, predicted {predicted:.3f}')
+            f'PID: {pid}, slice {sid}, class {y}, predicted {predicted:.3f}, tta {tta.mean():.3f}, tta std {tta.std():.3f}')
         plt.subplots_adjust(wspace=0.01, left=0.001, right=0.9999)
         # plt.show()
         fig.savefig(base_path + f'interpretability_vis/interpretability{suffix}/' +
