@@ -26,6 +26,17 @@ import h5py
 import gc
 import pandas as pd
 from lime import lime_image
+from skimage.segmentation import slic, quickshift
+
+
+# use another function for slic segmentation
+def custom_segmentation(image):
+    return np.transpose(slic(np.transpose(image[..., [0]], (1, 0)), n_segments=100, compactness=0.2, channel_axis=-1), (1, 0))
+
+# # use another function for quickshift segmentation
+# def custom_segmentation(image):
+#     return np.transpose(quickshift(np.transpose(image, (1, 0, 2)), kernel_size=4, max_dist=200, ratio=0.2, channel_axis=-1))
+
 
 
 class Matthews_corrcoef_scorer:
@@ -135,8 +146,8 @@ if __name__ == '__main__':
     pids = np.concatenate(pids)
     sids = np.concatenate(sids)
 
-    with h5py.File(args.log_folder + f'/test_lime.h5', 'w') as f:
-        print('created file', args.log_folder + f'/test_lime.h5')
+    with h5py.File(args.log_folder + f'/test_lime_slic.h5', 'w') as f:
+        print('created file', args.log_folder + f'/test_lime_slic.h5')
         f.create_dataset(meta[0], data=pids)
         f.create_dataset(meta[1], data=sids)
         f.create_dataset('lime', shape=(len(pids), 256, 256))
@@ -147,13 +158,13 @@ if __name__ == '__main__':
     for x, _ in data_gen:
         print(f'Batch {i}/{steps_per_epoch}')
         for image in x:
-            explanation = explainer.explain_instance(image.astype('double'), model.predict, top_labels=1, hide_color=0, num_samples=1000)
+            explanation = explainer.explain_instance(image.astype('double'), model.predict, top_labels=1, hide_color=0, num_samples=1000, segmentation_fn=custom_segmentation)
             ind =  explanation.top_labels[0]
             #Map each explanation weight to the corresponding superpixel
             dict_heatmap = dict(explanation.local_exp[ind])
             lime_heatmap = np.vectorize(dict_heatmap.get)(explanation.segments)
 
-            with h5py.File(args.log_folder + f'/test_lime.h5', 'a') as f:
+            with h5py.File(args.log_folder + f'/test_lime_slic.h5', 'a') as f:
                 f['lime'][sub_idx] = lime_heatmap
             sub_idx += 1
         i += 1
