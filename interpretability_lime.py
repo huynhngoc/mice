@@ -31,7 +31,7 @@ from skimage.segmentation import slic, quickshift
 
 # use another function for slic segmentation
 def custom_segmentation(image):
-    return np.transpose(slic(np.transpose(image[..., [0]], (1, 0)), n_segments=100, compactness=0.2, channel_axis=-1), (1, 0))
+    return np.transpose(slic(np.transpose(image[..., [0]], (1, 0, 2)), n_segments=100, compactness=0.2, channel_axis=-1), (1, 0))
 
 # # use another function for quickshift segmentation
 # def custom_segmentation(image):
